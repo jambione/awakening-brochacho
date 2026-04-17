@@ -123,8 +123,16 @@ func serialize() -> Dictionary:
 
 func deserialize(data: Dictionary) -> void:
 	current_chapter     = str(data.get("current_chapter", "ch1_the_hold"))
-	completed_dialogues = data.get("completed_dialogues", [])
-	quests              = data.get("quests", {})
+	completed_dialogues = _load_string_array(data.get("completed_dialogues", []))
+	quests              = data.get("quests", {}) if data.get("quests", null) is Dictionary else {}
+
+func _load_string_array(raw: Variant) -> Array[String]:
+	var result : Array[String] = []
+	if not raw is Array:
+		return result
+	for item : Variant in (raw as Array):
+		result.append(str(item))
+	return result
 
 func reset() -> void:
 	current_chapter     = "ch1_the_hold"
