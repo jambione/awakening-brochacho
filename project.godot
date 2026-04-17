@@ -24,6 +24,7 @@ StoryManager="*res://scripts/autoloads/StoryManager.gd"
 AudioManager="*res://scripts/autoloads/AudioManager.gd"
 SceneManager="*res://scripts/autoloads/SceneManager.gd"
 EraManager="*res://scripts/autoloads/EraManager.gd"
+TouchController="*res://scripts/ui/TouchController.gd"
 
 [display]
 

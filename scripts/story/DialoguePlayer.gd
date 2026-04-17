@@ -37,6 +37,10 @@ var _tree     : Dictionary = {}   ## The full node dictionary for this dialogue.
 var _cur_id   : String     = ""   ## Currently displayed node id.
 var _active   : bool       = false
 
+func _ready() -> void:
+	# Accept touch/mouse so _gui_input fires for tap-to-advance.
+	mouse_filter = Control.MOUSE_FILTER_STOP
+
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
@@ -68,10 +72,20 @@ func stop() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not _active:
 		return
+	# Keyboard / gamepad advance.
 	if event.is_action_pressed("interact"):
-		# Only advance automatically if there are no choices visible.
 		if choices_root.get_child_count() == 0:
 			_advance()
+			get_viewport().set_input_as_handled()
+
+func _gui_input(event: InputEvent) -> void:
+	# Tap anywhere on the dialogue panel to advance (mobile tap-to-advance).
+	if not _active:
+		return
+	if event is InputEventScreenTouch and (event as InputEventScreenTouch).pressed:
+		if choices_root.get_child_count() == 0:
+			_advance()
+			accept_event()
 
 # ---------------------------------------------------------------------------
 # Internal
@@ -129,6 +143,8 @@ func _show_node(node_id: String) -> void:
 		for c in (choices as Array):
 			var btn : Button = Button.new()
 			btn.text = str(c.get("text", "..."))
+			btn.custom_minimum_size   = Vector2(0, 56)
+			btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			var next_id : String = str(c.get("next", "end"))
 			btn.pressed.connect(_on_choice_pressed.bind(next_id))
 			choices_root.add_child(btn)
