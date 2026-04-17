@@ -17,7 +17,7 @@ func _ready() -> void:
 		if child.has_method("set_dialogue_box"):
 			child.set_dialogue_box(_dialogue)
 
-	AudioManager.play_music("res://assets/audio/music/overworld_theme.ogg")
+	AudioManager.play_music_for_chapter(StoryManager.current_chapter)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("menu"):

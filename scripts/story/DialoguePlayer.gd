@@ -55,6 +55,8 @@ func play(dialogue_id: String) -> void:
 	_active = true
 	visible = true
 	StoryManager.start_dialogue(dialogue_id)
+	AudioManager.play_sfx("dialogue_open")
+	AudioManager.haptic_interact()
 	_show_node("start")
 
 func stop() -> void:
@@ -63,6 +65,7 @@ func stop() -> void:
 	for child in choices_root.get_children():
 		child.queue_free()
 	StoryManager.end_dialogue()
+	AudioManager.play_sfx("dialogue_close")
 	emit_signal("dialogue_finished")
 
 # ---------------------------------------------------------------------------
@@ -159,6 +162,7 @@ func _advance() -> void:
 	if not _tree.has(_cur_id):
 		stop()
 		return
+	AudioManager.play_sfx("dialogue_next")
 	var node    : Dictionary = _tree[_cur_id]
 	var next_id : String     = str(node.get("next", ""))
 	if next_id == "" or next_id == "end":
@@ -167,6 +171,8 @@ func _advance() -> void:
 		_show_node(next_id)
 
 func _on_choice_pressed(next_id: String) -> void:
+	AudioManager.play_sfx("dialogue_next")
+	AudioManager.haptic_tap()
 	for child in choices_root.get_children():
 		child.queue_free()
 	if next_id == "" or next_id == "end":

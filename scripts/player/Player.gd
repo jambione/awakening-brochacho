@@ -22,6 +22,13 @@ extends CharacterBody2D
 ## Tile size in pixels — must match the TileSet.
 @export var tile_size   : int   = 16
 
+func _ready() -> void:
+	step_timer.timeout.connect(_on_step_timer_timeout)
+
+func _on_step_timer_timeout() -> void:
+	AudioManager.play_sfx("footstep_" + surface)
+	AudioManager.haptic_tap()
+
 # ---------------------------------------------------------------------------
 # Node references (populated at ready via @onready)
 # ---------------------------------------------------------------------------
@@ -37,6 +44,8 @@ var locked       : bool    = false
 ## Last non-zero direction — used for idle animation and interact ray.
 var facing       : Vector2 = Vector2.DOWN
 var _is_running  : bool    = false
+## Surface type drives footstep SFX — set by zone triggers or tilemap meta.
+var surface      : String  = "grass"
 
 # ---------------------------------------------------------------------------
 # _physics_process — called every physics tick (60 Hz)
@@ -66,9 +75,14 @@ func _physics_process(_delta: float) -> void:
 
 	move_and_slide()
 
-	# Persist tile-space position to GameManager every frame so saving
-	# mid-dungeon always records the correct location.
 	GameManager.player_position = position / float(tile_size)
+
+	# Drive footstep timer: run when moving, pause when idle.
+	if dir != Vector2.ZERO:
+		if step_timer.is_stopped():
+			step_timer.start()
+	else:
+		step_timer.stop()
 
 # ---------------------------------------------------------------------------
 # Input

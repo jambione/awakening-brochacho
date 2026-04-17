@@ -24,4 +24,6 @@ func interact(_caller: Node = null) -> void:
 	var dialogue_id : String = StoryManager.get_dialogue_id(npc_id)
 	if dialogue_id == "":
 		return   ## NPC has nothing to say right now.
+	AudioManager.play_sfx("interact")
+	AudioManager.haptic_interact()
 	_dialogue_box.play(dialogue_id)
