@@ -160,14 +160,14 @@ func load_game(slot: int = 0) -> bool:
 		push_error("GameManager: save file corrupt — %s" % path)
 		return false
 	var data : Dictionary = result
-	play_time       = float(data.get("play_time", 0.0))
-	gold            = int(data.get("gold", 0))
-	inventory       = data.get("inventory", [])
-	game_flags      = data.get("game_flags", {})
-	current_map     = str(data.get("current_map", "overworld"))
-	dungeon_seed    = int(data.get("dungeon_seed", 0))
-	dungeon_floor   = int(data.get("dungeon_floor", 1))
-	var pp : Dictionary = data.get("player_position", {"x": 10, "y": 10})
+	play_time     = float(data.get("play_time", 0.0))
+	gold          = int(data.get("gold", 0))
+	inventory     = _load_dict_array(data.get("inventory", []))
+	game_flags    = data.get("game_flags", {}) if data.get("game_flags", {}) is Dictionary else {}
+	current_map   = str(data.get("current_map", "overworld"))
+	dungeon_seed  = int(data.get("dungeon_seed", 0))
+	dungeon_floor = int(data.get("dungeon_floor", 1))
+	var pp : Dictionary = data.get("player_position", {"x": 10, "y": 10}) if data.get("player_position", null) is Dictionary else {"x": 10, "y": 10}
 	player_position = Vector2(float(pp.get("x", 10)), float(pp.get("y", 10)))
 	PartyManager.deserialize(data.get("party", {}))
 	StoryManager.deserialize(data.get("story", {}))
@@ -249,3 +249,13 @@ func format_play_time() -> String:
 func advance_dungeon_floor() -> void:
 	dungeon_floor += 1
 	dungeon_seed   = randi()
+
+## Convert a plain Array (from JSON) to Array[Dictionary], skipping non-dict entries.
+func _load_dict_array(raw: Variant) -> Array[Dictionary]:
+	var result : Array[Dictionary] = []
+	if not raw is Array:
+		return result
+	for item in (raw as Array):
+		if item is Dictionary:
+			result.append(item as Dictionary)
+	return result

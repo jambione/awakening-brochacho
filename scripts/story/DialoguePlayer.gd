@@ -23,12 +23,12 @@ class_name DialoguePlayer
 signal dialogue_finished
 
 # ---------------------------------------------------------------------------
-# Node references — set these in the Inspector or via the parent scene.
+# Node references — must match DialogueBox.tscn layout.
 # ---------------------------------------------------------------------------
-@export var speaker_label  : Label
-@export var text_label     : RichTextLabel
-@export var choices_root   : VBoxContainer
-@export var advance_hint   : Label   ## "Press Z to continue" hint label.
+@onready var speaker_label  : Label         = $Panel/VBox/SpeakerLabel
+@onready var text_label     : RichTextLabel = $Panel/VBox/TextLabel
+@onready var choices_root   : VBoxContainer = $Panel/VBox/ChoicesRoot
+@onready var advance_hint   : Label         = $Panel/VBox/AdvanceHint
 
 # ---------------------------------------------------------------------------
 # State

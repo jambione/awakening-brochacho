@@ -11,10 +11,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 offset_top = -110.0
 script = ExtResource("1")
-speaker_label = NodePath("Panel/VBox/SpeakerLabel")
-text_label = NodePath("Panel/VBox/TextLabel")
-choices_root = NodePath("Panel/VBox/ChoicesRoot")
-advance_hint = NodePath("Panel/VBox/AdvanceHint")
 visible = false
 
 [node name="Panel" type="PanelContainer" parent="."]
