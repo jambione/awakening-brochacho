@@ -23,6 +23,7 @@ PartyManager="*res://scripts/autoloads/PartyManager.gd"
 StoryManager="*res://scripts/autoloads/StoryManager.gd"
 AudioManager="*res://scripts/autoloads/AudioManager.gd"
 SceneManager="*res://scripts/autoloads/SceneManager.gd"
+EraManager="*res://scripts/autoloads/EraManager.gd"
 
 [display]
 

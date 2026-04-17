@@ -135,6 +135,7 @@ func save_game(slot: int = 0) -> bool:
 		"dungeon_floor"   : dungeon_floor,
 		"party"           : PartyManager.serialize(),
 		"story"           : StoryManager.serialize(),
+		"era"             : EraManager.serialize(),
 	}
 	var path : String = SAVE_DIR + "save_%d.json" % slot
 	var file : FileAccess = FileAccess.open(path, FileAccess.WRITE)
@@ -170,6 +171,7 @@ func load_game(slot: int = 0) -> bool:
 	player_position = Vector2(float(pp.get("x", 10)), float(pp.get("y", 10)))
 	PartyManager.deserialize(data.get("party", {}))
 	StoryManager.deserialize(data.get("story", {}))
+	EraManager.deserialize(data.get("era", {}))
 	current_save_slot = slot
 	emit_signal("game_loaded")
 	return true
@@ -230,6 +232,7 @@ func new_game() -> void:
 	dungeon_floor   = 1
 	PartyManager.init_default_party()
 	StoryManager.reset()
+	EraManager.reset()
 
 # ---------------------------------------------------------------------------
 # Utility
