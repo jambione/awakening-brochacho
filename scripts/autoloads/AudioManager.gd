@@ -170,9 +170,8 @@ func _setup_era_effects() -> void:
 		return
 
 	var lp : AudioEffectFilter = AudioEffectFilter.new()
-	lp.filter_db    = 0.0
-	lp.cutoff_hz    = 22000.0
-	lp.resonance    = 0.5
+	lp.cutoff_hz = 22000.0
+	lp.resonance = 0.5
 	AudioServer.add_bus_effect(_music_bus_idx, lp)
 	_filter_idx = AudioServer.get_bus_effect_count(_music_bus_idx) - 1
 
