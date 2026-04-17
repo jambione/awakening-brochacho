@@ -1,118 +1,149 @@
+## DungeonController — wires the DungeonGenerator output onto live scene nodes.
+##
+## Attach to the root Node2D of Dungeon.tscn. All @export variables should be
+## set in the Inspector so this script stays data-driven and easy to swap.
 extends Node2D
 
-# ── Node refs ─────────────────────────────────────────────────────────────────
-@onready var tile_map:     TileMapLayer  = $TileMapLayer
-@onready var player:       CharacterBody2D = $Player
-@onready var enemy_root:   Node2D        = $Enemies
-@onready var objects_root: Node2D        = $Objects
-@onready var camera:       Camera2D      = $Player/Camera2D
-@onready var hud:          CanvasLayer   = $HUD
-@onready var minimap:      Control       = $HUD/Minimap
+# ---------------------------------------------------------------------------
+# Inspector-configurable packed scenes (drag & drop in editor)
+# ---------------------------------------------------------------------------
+## One entry per enemy type key used in DungeonGenerator (e.g. "slime").
+@export var enemy_scenes  : Dictionary   = {}
+@export var chest_scene   : PackedScene
+@export var door_scene    : PackedScene
 
-# ── Packed scenes ─────────────────────────────────────────────────────────────
-@export var enemy_scenes: Dictionary = {}   # { "slime": preload(...), ... }
-@export var chest_scene:  PackedScene
-@export var door_scene:   PackedScene
+# ---------------------------------------------------------------------------
+# Node references
+# ---------------------------------------------------------------------------
+@onready var tile_map    : TileMapLayer    = $TileMapLayer
+@onready var enemies_root: Node2D          = $Enemies
+@onready var objects_root: Node2D          = $Objects
+@onready var player      : CharacterBody2D = $Player
+@onready var minimap     : Control         = $HUD/Minimap
 
-# ── Generator ─────────────────────────────────────────────────────────────────
-var generator := DungeonGenerator.new()
-var dungeon_data: Dictionary = {}
-
-const TILE_SIZE := 16
-# TileSet source / atlas coords — adjust to match your actual TileSet
-const ATLAS_SOURCE := 0
-const ATLAS := {
-	"floor":  Vector2i(0, 0),
-	"wall":   Vector2i(1, 0),
-	"door":   Vector2i(2, 0),
-	"chest":  Vector2i(3, 0),
-	"stairs": Vector2i(4, 0),
+# ---------------------------------------------------------------------------
+# TileSet atlas configuration — update these to match your actual TileSet.
+# ---------------------------------------------------------------------------
+const ATLAS_SOURCE : int = 0  ## TileSet source index.
+## Maps tile ID constants to atlas coordinates in the TileSet sprite sheet.
+const ATLAS : Dictionary = {
+	DungeonGenerator.TILE_FLOOR  : Vector2i(0, 0),
+	DungeonGenerator.TILE_WALL   : Vector2i(1, 0),
+	DungeonGenerator.TILE_DOOR   : Vector2i(2, 0),
+	DungeonGenerator.TILE_CHEST  : Vector2i(3, 0),
+	DungeonGenerator.TILE_STAIRS : Vector2i(4, 0),
 }
+const TILE_SIZE : int = 16
 
-# ── Lifecycle ─────────────────────────────────────────────────────────────────
+# ---------------------------------------------------------------------------
+# State
+# ---------------------------------------------------------------------------
+var dungeon_data : Dictionary = {}
+
+# ---------------------------------------------------------------------------
+# Lifecycle
+# ---------------------------------------------------------------------------
+
 func _ready() -> void:
-	add_child(generator)
-	var use_seed := GameManager.dungeon_seed
-	if use_seed == 0:
-		use_seed = randi()
-		GameManager.dungeon_seed = use_seed
+	# Seed may have been set by SceneManager before the scene loaded.
+	if GameManager.dungeon_seed == 0:
+		GameManager.dungeon_seed = randi()
 
-	dungeon_data = generator.generate(use_seed)
+	var gen : DungeonGenerator = DungeonGenerator.new()
+	add_child(gen)
+	dungeon_data = gen.generate(GameManager.dungeon_seed)
+
 	_paint_tilemap()
-	_spawn_enemies()
 	_spawn_objects()
+	_spawn_enemies()
 	_place_player()
-	_setup_minimap()
+	_init_minimap()
 
 	AudioManager.play_music("res://assets/audio/music/dungeon_theme.ogg")
 
-# ── TileMap painting ──────────────────────────────────────────────────────────
+# ---------------------------------------------------------------------------
+# TileMap painting
+# ---------------------------------------------------------------------------
+
 func _paint_tilemap() -> void:
-	var grid: Array = dungeon_data.grid
-	for y in dungeon_data.height:
-		for x in dungeon_data.width:
-			var tile: int = grid[y][x]
-			var atlas_coord := _tile_to_atlas(tile)
-			if atlas_coord != Vector2i(-1, -1):
-				tile_map.set_cell(Vector2i(x, y), ATLAS_SOURCE, atlas_coord)
+	var grid   : Array = dungeon_data.grid
+	var height : int   = dungeon_data.height
+	var width  : int   = dungeon_data.width
 
-func _tile_to_atlas(tile: int) -> Vector2i:
-	match tile:
-		DungeonGenerator.TILE_FLOOR:  return ATLAS.floor
-		DungeonGenerator.TILE_WALL:   return ATLAS.wall
-		DungeonGenerator.TILE_STAIRS: return ATLAS.stairs
-		_:                            return Vector2i(-1, -1)  # void = empty
+	for y in height:
+		for x in width:
+			var tile_id : int = int(grid[y][x])
+			if ATLAS.has(tile_id):
+				tile_map.set_cell(Vector2i(x, y), ATLAS_SOURCE, ATLAS[tile_id])
 
-# ── Enemy spawning ────────────────────────────────────────────────────────────
+# ---------------------------------------------------------------------------
+# Object spawning (chests, doors)
+# ---------------------------------------------------------------------------
+
+func _spawn_objects() -> void:
+	var grid : Array = dungeon_data.grid
+
+	# Doors — read from the grid so placement is always consistent.
+	if door_scene:
+		for y in dungeon_data.height:
+			for x in dungeon_data.width:
+				if int(grid[y][x]) == DungeonGenerator.TILE_DOOR:
+					var door : Node2D = door_scene.instantiate()
+					door.position = Vector2(x, y) * TILE_SIZE
+					objects_root.add_child(door)
+
+	# Chests — use the pre-computed list from the generator.
+	if chest_scene:
+		for pos in dungeon_data.chest_positions:
+			var chest : Node2D = chest_scene.instantiate()
+			chest.position = Vector2(pos) * TILE_SIZE
+			objects_root.add_child(chest)
+
+# ---------------------------------------------------------------------------
+# Enemy spawning
+# ---------------------------------------------------------------------------
+
 func _spawn_enemies() -> void:
 	for spawn in dungeon_data.enemy_spawns:
-		var type: String = spawn.type
+		var type : String = str(spawn.type)
 		if not enemy_scenes.has(type):
 			continue
-		var enemy: Node2D = enemy_scenes[type].instantiate()
+		var enemy : Node2D = enemy_scenes[type].instantiate()
 		enemy.position = Vector2(spawn.pos) * TILE_SIZE
 		if enemy.has_method("set_level"):
-			enemy.set_level(spawn.level)
-		enemy_root.add_child(enemy)
+			enemy.set_level(int(spawn.level))
+		enemies_root.add_child(enemy)
 
-# ── Object spawning (chests, doors) ───────────────────────────────────────────
-func _spawn_objects() -> void:
-	# Doors
-	var grid: Array = dungeon_data.grid
-	for y in dungeon_data.height:
-		for x in dungeon_data.width:
-			if grid[y][x] == DungeonGenerator.TILE_DOOR and door_scene:
-				var door := door_scene.instantiate()
-				door.position = Vector2(x, y) * TILE_SIZE
-				objects_root.add_child(door)
+# ---------------------------------------------------------------------------
+# Player placement
+# ---------------------------------------------------------------------------
 
-	# Chests
-	for pos in dungeon_data.chest_positions:
-		if not chest_scene:
-			break
-		var chest := chest_scene.instantiate()
-		chest.position = Vector2(pos) * TILE_SIZE
-		objects_root.add_child(chest)
-
-	# Stairs
-	var stair_pos: Vector2i = dungeon_data.stairs_pos
-	tile_map.set_cell(stair_pos, ATLAS_SOURCE, ATLAS.stairs)
-
-# ── Player placement ──────────────────────────────────────────────────────────
 func _place_player() -> void:
-	var start: Vector2i = dungeon_data.start_pos
+	var start : Vector2i = dungeon_data.start_pos
 	player.position = Vector2(start) * TILE_SIZE
 
-# ── Minimap ───────────────────────────────────────────────────────────────────
-func _setup_minimap() -> void:
+# ---------------------------------------------------------------------------
+# Minimap
+# ---------------------------------------------------------------------------
+
+func _init_minimap() -> void:
 	if minimap and minimap.has_method("build_from_data"):
 		minimap.build_from_data(dungeon_data)
 
-# ── Stair transition ──────────────────────────────────────────────────────────
-func _on_stairs_entered() -> void:
-	SceneManager.go_to_dungeon()  # New seed = new dungeon floor
+# ---------------------------------------------------------------------------
+# Stair callback — triggered by a trigger area near the stairs tile.
+# ---------------------------------------------------------------------------
 
-# ── Debug: regenerate on F5 ───────────────────────────────────────────────────
+func on_stairs_entered() -> void:
+	GameManager.advance_dungeon_floor()
+	SceneManager.go_to_dungeon()
+
+# ---------------------------------------------------------------------------
+# Debug helpers
+# ---------------------------------------------------------------------------
+
 func _unhandled_input(event: InputEvent) -> void:
+	# F5 in debug builds re-rolls the dungeon immediately.
 	if OS.is_debug_build() and event.is_action_pressed("ui_cancel"):
+		GameManager.dungeon_seed = randi()
 		get_tree().reload_current_scene()

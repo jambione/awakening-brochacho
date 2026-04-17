@@ -1,10 +1,6 @@
-; Engine configuration file.
-; It's best edited using the editor UI and not directly,
-; since the parameters that go here are not all obvious.
-;
-; Format:
-;   [section] ; section goes between []
-;   param=value ; assign values to parameters
+; Engine configuration file — Awakening Brochacho
+; Godot 4.6 | Internal res 320×240 | Nearest-neighbor | Integer scale
+; Edit via the Godot editor UI for safety; manual edits documented here.
 
 config_version=5
 
@@ -15,7 +11,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="Awakening Brochacho"
-config/description="Retro top-down pixel-art RPG"
+config/description="A charming retro top-down pixel-art RPG."
 run/main_scene="res://scenes/main/Main.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://assets/sprites/ui/icon.png"
@@ -28,17 +24,18 @@ StoryManager="*res://scripts/autoloads/StoryManager.gd"
 AudioManager="*res://scripts/autoloads/AudioManager.gd"
 SceneManager="*res://scripts/autoloads/SceneManager.gd"
 
-[configuration]
-
-config_version=5
-
 [display]
 
+; 320×240 internal — scales to 640×480, 960×720, 1280×960 exactly (integer steps).
+; "canvas_items" stretch mode + "keep" aspect = pixel-perfect on any monitor.
 window/size/viewport_width=320
 window/size/viewport_height=240
 window/size/window_width_override=960
 window/size/window_height_override=720
 window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+; Integer scale prevents sub-pixel blurring on non-integer monitor sizes.
+window/stretch/scale_mode="integer"
 
 [input]
 
@@ -91,13 +88,29 @@ open_level_designer={
 
 [layer_names]
 
+; Collision layers — keep these stable; changing them breaks existing scenes.
 2d_physics/layer_1="world"
 2d_physics/layer_2="player"
 2d_physics/layer_3="enemies"
 2d_physics/layer_4="items"
 2d_physics/layer_5="triggers"
 
+[physics]
+
+; 60 Hz physics matches our 60 fps target and keeps movement deterministic.
+common/physics_ticks_per_second=60
+
 [rendering]
 
+; Nearest-neighbor (0) = hard pixel edges — the classic retro look.
+; Linear (1) would blur sprites; never use that here.
 textures/canvas_textures/default_texture_filter=0
 renderer/rendering_method.mobile="gl_compatibility"
+
+[gdscript]
+
+; Treat type-inference warnings as errors so Variant bugs surface at parse time.
+warnings/untyped_declaration=2
+warnings/inferred_declaration=2
+warnings/unsafe_property_access=1
+warnings/unsafe_method_access=1
