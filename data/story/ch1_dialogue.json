@@ -1,0 +1,217 @@
+{
+  "old_rufus_intro": {
+    "nodes": {
+      "start": {
+        "speaker": "Old Rufus",
+        "portrait": "",
+        "text": "Oi! You're finally awake, lad. Thought the fog had taken you too.",
+        "next": "n1"
+      },
+      "n1": {
+        "speaker": "Old Rufus",
+        "text": "Three days you slept in that bed. Three days.",
+        "next": "n2"
+      },
+      "n2": {
+        "speaker": "Old Rufus",
+        "text": "Since the Veil fell, the Thornwood has gone mad — creatures prowling right up to the village gate.",
+        "choices": [
+          { "text": "What is the Veil?",          "next": "explain_veil" },
+          { "text": "I should get my bearings.",  "next": "get_going" }
+        ]
+      },
+      "explain_veil": {
+        "speaker": "Old Rufus",
+        "text": "It's a ward — ancient magic that kept the old dungeon sealed for a hundred years. Something tore it open three nights ago. That's when you washed up on the riverbank.",
+        "next": "n3"
+      },
+      "n3": {
+        "speaker": "Old Rufus",
+        "text": "I don't know who you are, boy, but I know a chosen fool when I see one.",
+        "choices": [
+          { "text": "...Chosen?",                 "next": "chosen" },
+          { "text": "I'll fix it. Just point me.", "next": "get_going" }
+        ]
+      },
+      "chosen": {
+        "speaker": "Old Rufus",
+        "text": "Only those tied to the Veil can pass through the dungeon's lower seals. Your arrival the same night as the collapse is no coincidence, lad.",
+        "next": "get_going"
+      },
+      "get_going": {
+        "speaker": "Old Rufus",
+        "text": "The Thornwood Gate is east of the village. The first chamber of the dungeon is just past it. Start there — and don't die.\n\n[i]Quest added: Descend the Thornwood Dungeon.[/i]",
+        "next": "end",
+        "set_flag": "met_rufus",
+        "start_quest": "ch1_dungeon_descent"
+      },
+      "end": {
+        "speaker": "",
+        "text": "",
+        "next": ""
+      }
+    }
+  },
+
+  "old_rufus_repeat": {
+    "nodes": {
+      "start": {
+        "speaker": "Old Rufus",
+        "text": "The gate's east of here. Keep moving — those creatures won't seal themselves in.",
+        "next": "end"
+      },
+      "end": { "speaker": "", "text": "", "next": "" }
+    }
+  },
+
+  "mira_the_smith": {
+    "nodes": {
+      "start": {
+        "speaker": "Mira",
+        "text": "I'd help more if I had copper ingots. Check the dungeon chests — there's always some in the first hall.",
+        "next": "n1"
+      },
+      "n1": {
+        "speaker": "Mira",
+        "text": "Bring me three ingots and I'll sharpen that rusty sword of yours for free.",
+        "next": "end",
+        "start_quest": "ch1_copper_ingots"
+      },
+      "end": { "speaker": "", "text": "", "next": "" }
+    }
+  },
+
+  "mira_has_ingots": {
+    "nodes": {
+      "start": {
+        "speaker": "Mira",
+        "text": "You found them! Give me a moment...",
+        "next": "n1"
+      },
+      "n1": {
+        "speaker": "Mira",
+        "text": "There. The Short Sword is now a Long Sword. Should do you well against the golems.",
+        "next": "end",
+        "set_flag": "mira_upgraded",
+        "complete_quest": "ch1_copper_ingots",
+        "give_item": "long_sword"
+      },
+      "end": { "speaker": "", "text": "", "next": "" }
+    }
+  },
+
+  "zara_join": {
+    "nodes": {
+      "start": {
+        "speaker": "Zara",
+        "text": "Oh, another one stumbling toward the dungeon. Wonderful.",
+        "next": "n1"
+      },
+      "n1": {
+        "speaker": "Zara",
+        "text": "Before you ask — yes, I know magic. And yes, I'll come with you. The Veil's collapse disrupted my research anyway.",
+        "choices": [
+          { "text": "Glad to have you.",   "next": "accept" },
+          { "text": "I work alone.",        "next": "decline" }
+        ]
+      },
+      "accept": {
+        "speaker": "Zara",
+        "text": "Don't make me regret it.\n\n[i]Zara joined the party![/i]",
+        "next": "end",
+        "set_flag": "zara_joined",
+        "add_member": "mage"
+      },
+      "decline": {
+        "speaker": "Zara",
+        "text": "...Suit yourself. I'll be here when you change your mind.",
+        "next": "end"
+      },
+      "end": { "speaker": "", "text": "", "next": "" }
+    }
+  },
+
+  "slink_join": {
+    "nodes": {
+      "start": {
+        "speaker": "Slink",
+        "text": "Psst. Yeah, you. Word spreads fast in a small village.",
+        "next": "n1"
+      },
+      "n1": {
+        "speaker": "Slink",
+        "text": "You're heading into the dungeon, right? I know every shortcut in the first three floors. Could be useful.",
+        "choices": [
+          { "text": "You're in.",                  "next": "accept" },
+          { "text": "What's in it for you?",       "next": "deal" }
+        ]
+      },
+      "deal": {
+        "speaker": "Slink",
+        "text": "Even split on the gold. And I keep whatever I can pocket from the enemies. Deal?",
+        "choices": [
+          { "text": "Deal.",    "next": "accept" },
+          { "text": "No deal.", "next": "decline" }
+        ]
+      },
+      "accept": {
+        "speaker": "Slink",
+        "text": "Ha! Good. I like you already.\n\n[i]Slink joined the party![/i]",
+        "next": "end",
+        "set_flag": "slink_joined",
+        "add_member": "rogue"
+      },
+      "decline": {
+        "speaker": "Slink",
+        "text": "Your loss. I'll find someone else.",
+        "next": "end"
+      },
+      "end": { "speaker": "", "text": "", "next": "" }
+    }
+  },
+
+  "dungeon_chest_lore": {
+    "nodes": {
+      "start": {
+        "speaker": "???",
+        "text": "[Faded journal entry]\n\n'The Golem Warden was placed here to prevent mortals from reaching the lower seals. It must not be destroyed — only pacified with the Resonance Stone.'",
+        "next": "end"
+      },
+      "end": { "speaker": "", "text": "", "next": "" }
+    }
+  },
+
+  "boss_golem_taunt": {
+    "nodes": {
+      "start": {
+        "speaker": "Mud Golem",
+        "text": "[The golem lets out a grinding roar. Dust shakes from the ceiling.]",
+        "next": "end"
+      },
+      "end": { "speaker": "", "text": "", "next": "" }
+    }
+  },
+
+  "ch1_complete": {
+    "nodes": {
+      "start": {
+        "speaker": "Old Rufus",
+        "text": "You made it back. And the seal... I can feel it. The first one is restored.",
+        "next": "n1"
+      },
+      "n1": {
+        "speaker": "Old Rufus",
+        "text": "There are four seals in total. The Veil won't hold on just one.",
+        "next": "n2"
+      },
+      "n2": {
+        "speaker": "Old Rufus",
+        "text": "Rest. The second dungeon lies beyond the Ashfen Marsh. You'll need supplies.",
+        "next": "end",
+        "set_flag": "ch1_complete",
+        "complete_quest": "ch1_dungeon_descent"
+      },
+      "end": { "speaker": "", "text": "", "next": "" }
+    }
+  }
+}

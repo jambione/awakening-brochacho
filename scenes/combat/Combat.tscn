@@ -35,6 +35,19 @@ alignment = 1
 
 [node name="UI" type="CanvasLayer" parent="."]
 
+[node name="MemberLabel" type="Label" parent="UI"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -180.0
+offset_top = -130.0
+offset_right = -110.0
+offset_bottom = -100.0
+text = ""
+
 [node name="ActionMenu" type="VBoxContainer" parent="UI"]
 layout_mode = 1
 anchors_preset = 3
@@ -43,7 +56,7 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -100.0
-offset_top = -90.0
+offset_top = -120.0
 
 [node name="Attack" type="Button" parent="UI/ActionMenu"]
 text = "Attack"
@@ -59,6 +72,39 @@ text = "Defend"
 
 [node name="Flee" type="Button" parent="UI/ActionMenu"]
 text = "Flee"
+
+[node name="SkillMenu" type="VBoxContainer" parent="UI"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -120.0
+visible = false
+
+[node name="ItemMenu" type="VBoxContainer" parent="UI"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -120.0
+visible = false
+
+[node name="TargetMenu" type="VBoxContainer" parent="UI"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -120.0
+visible = false
 
 [node name="BattleLog" type="RichTextLabel" parent="UI"]
 layout_mode = 1

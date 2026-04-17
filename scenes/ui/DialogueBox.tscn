@@ -1,0 +1,41 @@
+[gd_scene load_steps=2 format=3 uid="uid://dialoguebox"]
+
+[ext_resource type="Script" path="res://scripts/story/DialoguePlayer.gd" id="1"]
+
+[node name="DialogueBox" type="Control"]
+layout_mode = 1
+anchors_preset = 12
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -110.0
+script = ExtResource("1")
+speaker_label = NodePath("Panel/VBox/SpeakerLabel")
+text_label = NodePath("Panel/VBox/TextLabel")
+choices_root = NodePath("Panel/VBox/ChoicesRoot")
+advance_hint = NodePath("Panel/VBox/AdvanceHint")
+visible = false
+
+[node name="Panel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="VBox" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+
+[node name="SpeakerLabel" type="Label" parent="Panel/VBox"]
+text = ""
+
+[node name="TextLabel" type="RichTextLabel" parent="Panel/VBox"]
+custom_minimum_size = Vector2(0, 48)
+bbcode_enabled = true
+fit_content = true
+
+[node name="ChoicesRoot" type="VBoxContainer" parent="Panel/VBox"]
+
+[node name="AdvanceHint" type="Label" parent="Panel/VBox"]
+text = "[ Z / Enter ]"
+horizontal_alignment = 2

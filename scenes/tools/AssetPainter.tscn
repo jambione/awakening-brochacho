@@ -16,10 +16,29 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 
 [node name="Left" type="VBoxContainer" parent="UI"]
-custom_minimum_size = Vector2(60, 0)
+custom_minimum_size = Vector2(70, 0)
+
+[node name="Swatches" type="HBoxContainer" parent="UI/Left"]
+custom_minimum_size = Vector2(0, 24)
+
+[node name="Primary" type="ColorRect" parent="UI/Left/Swatches"]
+custom_minimum_size = Vector2(28, 24)
+color = Color(0, 0, 0, 1)
+size_flags_horizontal = 3
+
+[node name="Secondary" type="ColorRect" parent="UI/Left/Swatches"]
+custom_minimum_size = Vector2(28, 24)
+color = Color(1, 1, 1, 1)
+size_flags_horizontal = 3
+
+[node name="Preview" type="TextureRect" parent="UI/Left"]
+custom_minimum_size = Vector2(64, 64)
+expand_mode = 0
+stretch_mode = 5
 
 [node name="ColorPalette" type="GridContainer" parent="UI/Left"]
 columns = 4
+size_flags_vertical = 3
 
 [node name="Main" type="VBoxContainer" parent="UI"]
 size_flags_horizontal = 3
@@ -55,6 +74,10 @@ size_flags_vertical = 3
 custom_minimum_size = Vector2(256, 256)
 expand_mode = 0
 stretch_mode = 5
+
+[node name="GridOverlay" type="Control" parent="UI/Main/CanvasContainer"]
+layout_mode = 2
+mouse_filter = 2
 
 [node name="Bottom" type="HBoxContainer" parent="UI/Main"]
 
