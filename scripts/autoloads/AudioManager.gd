@@ -45,38 +45,38 @@ const CHAPTER_MUSIC : Dictionary = {
 # ---------------------------------------------------------------------------
 const SFX : Dictionary = {
 	# Movement
-	"footstep_grass"  : "res://assets/audio/sfx/footstep_grass.ogg",
-	"footstep_stone"  : "res://assets/audio/sfx/footstep_stone.ogg",
-	"footstep_wood"   : "res://assets/audio/sfx/footstep_wood.ogg",
+	"footstep_grass"  : "res://assets/audio/sfx/footstep_grass.wav",
+	"footstep_stone"  : "res://assets/audio/sfx/footstep_stone.wav",
+	"footstep_wood"   : "res://assets/audio/sfx/footstep_wood.wav",
 	# Interaction
-	"interact"        : "res://assets/audio/sfx/interact.ogg",
-	"chest_open"      : "res://assets/audio/sfx/chest_open.ogg",
-	"door_open"       : "res://assets/audio/sfx/door_open.ogg",
+	"interact"        : "res://assets/audio/sfx/interact.wav",
+	"chest_open"      : "res://assets/audio/sfx/chest_open.wav",
+	"door_open"       : "res://assets/audio/sfx/door_open.wav",
 	# Dialogue
-	"dialogue_open"   : "res://assets/audio/sfx/dialogue_open.ogg",
-	"dialogue_next"   : "res://assets/audio/sfx/dialogue_next.ogg",
-	"dialogue_close"  : "res://assets/audio/sfx/dialogue_close.ogg",
+	"dialogue_open"   : "res://assets/audio/sfx/dialogue_open.wav",
+	"dialogue_next"   : "res://assets/audio/sfx/dialogue_next.wav",
+	"dialogue_close"  : "res://assets/audio/sfx/dialogue_close.wav",
 	# Inventory / items
-	"item_pickup"     : "res://assets/audio/sfx/item_pickup.ogg",
-	"item_equip"      : "res://assets/audio/sfx/item_equip.ogg",
-	"gold_pickup"     : "res://assets/audio/sfx/gold_pickup.ogg",
+	"item_pickup"     : "res://assets/audio/sfx/item_pickup.wav",
+	"item_equip"      : "res://assets/audio/sfx/item_equip.wav",
+	"gold_pickup"     : "res://assets/audio/sfx/gold_pickup.wav",
 	# Quests
-	"quest_start"     : "res://assets/audio/sfx/quest_start.ogg",
-	"quest_complete"  : "res://assets/audio/sfx/quest_complete.ogg",
+	"quest_start"     : "res://assets/audio/sfx/quest_start.wav",
+	"quest_complete"  : "res://assets/audio/sfx/quest_complete.wav",
 	# UI
-	"menu_open"       : "res://assets/audio/sfx/menu_open.ogg",
-	"menu_close"      : "res://assets/audio/sfx/menu_close.ogg",
-	"button_confirm"  : "res://assets/audio/sfx/button_confirm.ogg",
-	"button_cancel"   : "res://assets/audio/sfx/button_cancel.ogg",
+	"menu_open"       : "res://assets/audio/sfx/menu_open.wav",
+	"menu_close"      : "res://assets/audio/sfx/menu_close.wav",
+	"button_confirm"  : "res://assets/audio/sfx/button_confirm.wav",
+	"button_cancel"   : "res://assets/audio/sfx/button_cancel.wav",
 	# Era
-	"era_transition"  : "res://assets/audio/sfx/era_transition.ogg",
+	"era_transition"  : "res://assets/audio/sfx/era_transition.wav",
 	# Combat
-	"sword_swing"     : "res://assets/audio/sfx/sword_swing.ogg",
-	"hit_impact"      : "res://assets/audio/sfx/hit_impact.ogg",
-	"player_hurt"     : "res://assets/audio/sfx/player_hurt.ogg",
-	"enemy_death"     : "res://assets/audio/sfx/enemy_death.ogg",
+	"sword_swing"     : "res://assets/audio/sfx/sword_swing.wav",
+	"hit_impact"      : "res://assets/audio/sfx/hit_impact.wav",
+	"player_hurt"     : "res://assets/audio/sfx/player_hurt.wav",
+	"enemy_death"     : "res://assets/audio/sfx/enemy_death.wav",
 	# Dungeon
-	"dungeon_descend" : "res://assets/audio/sfx/dungeon_descend.ogg",
+	"dungeon_descend" : "res://assets/audio/sfx/dungeon_descend.wav",
 }
 
 # ---------------------------------------------------------------------------
@@ -256,6 +256,8 @@ func _load_and_play(player: AudioStreamPlayer, path: String, loop: bool) -> bool
 	var stream : AudioStream = load(path)
 	if stream is AudioStreamOggVorbis:
 		(stream as AudioStreamOggVorbis).loop = loop
+	elif stream is AudioStreamWAV:
+		(stream as AudioStreamWAV).loop_mode = AudioStreamWAV.LOOP_FORWARD if loop else AudioStreamWAV.LOOP_DISABLED
 	player.stream    = stream
 	player.volume_db = 0.0
 	player.play()
