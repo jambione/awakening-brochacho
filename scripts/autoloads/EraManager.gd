@@ -32,12 +32,12 @@ const ERA_SETTINGS : Dictionary = {
 
 ## Maps chapter ids to the era that activates when that chapter starts.
 const CHAPTER_ERA : Dictionary = {
-	"ch1_awakening" : 0,   ## Era.ATARI
-	"ch2_ashfen"    : 1,   ## Era.NES
-	"ch3_citadel"   : 2,   ## Era.GBC
-	"ch4_vault"     : 3,   ## Era.SNES
-	"ch5_veil"      : 4,   ## Era.PS1
-	"epilogue"      : 5,   ## Era.MODERN
+	"ch1_the_hold"       : 0,   ## Era.ATARI  — boyhood, Brochan Hold
+	"ch2_the_unmooring"  : 1,   ## Era.NES    — Jambione dies, young adult
+	"ch3_the_seduction"  : 3,   ## Era.SNES   — prosperity, the lie (skip GBC — jump to vivid)
+	"ch4_the_reckoning"  : 4,   ## Era.PS1    — betrayal revealed, harshness
+	"ch5_the_embers"     : 2,   ## Era.GBC    — regression, world un-improves
+	"ch6_the_awakening"  : 5,   ## Era.MODERN — full restoration
 }
 
 # ---------------------------------------------------------------------------

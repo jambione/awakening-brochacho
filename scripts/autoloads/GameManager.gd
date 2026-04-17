@@ -233,6 +233,7 @@ func new_game() -> void:
 	PartyManager.init_default_party()
 	StoryManager.reset()
 	EraManager.reset()
+	StoryManager.start_chapter("ch1_the_hold")
 
 # ---------------------------------------------------------------------------
 # Utility

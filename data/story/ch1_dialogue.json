@@ -1,215 +1,207 @@
 {
-  "old_rufus_intro": {
+  "jambione_intro": {
     "nodes": {
       "start": {
-        "speaker": "Old Rufus",
-        "portrait": "",
-        "text": "Oi! You're finally awake, lad. Thought the fog had taken you too.",
+        "speaker": "Jambione",
+        "text": "There you are. Come, son. Walk with me.",
         "next": "n1"
       },
       "n1": {
-        "speaker": "Old Rufus",
-        "text": "Three days you slept in that bed. Three days.",
+        "speaker": "Jambione",
+        "text": "See that stone? Your grandfather set it. His father before him. Each one marks where our land ends and the world begins.",
         "next": "n2"
       },
       "n2": {
-        "speaker": "Old Rufus",
-        "text": "Since the Veil fell, the Thornwood has gone mad — creatures prowling right up to the village gate.",
+        "speaker": "Jambione",
+        "text": "The Veil runs through them. You cannot see it — but you can feel it, if you are patient enough to listen.",
         "choices": [
-          { "text": "What is the Veil?",          "next": "explain_veil" },
-          { "text": "I should get my bearings.",  "next": "get_going" }
+          { "text": "I want to learn the Veil.", "next": "learn_veil" },
+          { "text": "What is beyond the stones?", "next": "beyond" }
         ]
       },
-      "explain_veil": {
-        "speaker": "Old Rufus",
-        "text": "It's a ward — ancient magic that kept the old dungeon sealed for a hundred years. Something tore it open three nights ago. That's when you washed up on the riverbank.",
+      "learn_veil": {
+        "speaker": "Jambione",
+        "text": "Good. That is the right answer. The Veil is not magic, Brochacho. It is attention. It is knowing your land so well that nothing can be taken from you without you feeling it first.",
+        "next": "task"
+      },
+      "beyond": {
+        "speaker": "Jambione",
+        "text": "The Settlement. Good people, mostly. But they have a way of making 'mostly' do a great deal of work.",
+        "next": "task"
+      },
+      "task": {
+        "speaker": "Jambione",
+        "text": "Walk the boundary stones today. All seven. Tell me if any feel different than they did last week.\n\n[i]Quest added: Walk the Boundary of Brochan Hold.[/i]",
+        "next": "end",
+        "set_flag": "met_jambione",
+        "start_quest": "act1_boundary_walk"
+      },
+      "end": { "speaker": "", "text": "", "next": "" }
+    }
+  },
+
+  "jambione_repeat": {
+    "nodes": {
+      "start": {
+        "speaker": "Jambione",
+        "text": "The stones, Brochacho. Walk them first.",
+        "next": "end"
+      },
+      "end": { "speaker": "", "text": "", "next": "" }
+    }
+  },
+
+  "jambione_cassin_warning": {
+    "nodes": {
+      "start": {
+        "speaker": "Jambione",
+        "text": "You spoke to Cassin.",
+        "next": "n1"
+      },
+      "n1": {
+        "speaker": "Jambione",
+        "text": "He is not your enemy. Not yet. But a man who talks about 'offers' before he talks about the rain is a man who came to sell something.",
+        "next": "n2"
+      },
+      "n2": {
+        "speaker": "Jambione",
+        "text": "Do not let him make you feel clever for agreeing with him. That is how it starts.",
+        "next": "end",
+        "set_flag": "jambione_warned_cassin"
+      },
+      "end": { "speaker": "", "text": "", "next": "" }
+    }
+  },
+
+  "boundary_complete": {
+    "nodes": {
+      "start": {
+        "speaker": "Jambione",
+        "text": "You felt it. The east stone.",
+        "next": "n1"
+      },
+      "n1": {
+        "speaker": "Jambione",
+        "text": "Someone moved it six inches north. Small enough to miss. Not small enough to be an accident.",
+        "next": "n2"
+      },
+      "n2": {
+        "speaker": "Jambione",
+        "text": "I will move it back. I will always move it back. And one day, when I am gone, that will be your job. Then Jesse's. Then whoever comes after Jesse.",
         "next": "n3"
       },
       "n3": {
-        "speaker": "Old Rufus",
-        "text": "I don't know who you are, boy, but I know a chosen fool when I see one.",
+        "speaker": "Jambione",
+        "text": "This land remembers every foot that walked it, son. It will forget the ones who do not belong. It never forgets ours.",
+        "next": "end",
+        "set_flag": "act1_boundary_complete",
+        "complete_quest": "act1_boundary_walk"
+      },
+      "end": { "speaker": "", "text": "", "next": "" }
+    }
+  },
+
+  "jesse_intro": {
+    "nodes": {
+      "start": {
+        "speaker": "Jesse",
+        "text": "Finally! I have been out here all morning. Did Father send you to walk the boundary too?",
+        "next": "n1"
+      },
+      "n1": {
+        "speaker": "Jesse",
+        "text": "I found the east stone already. It is cold, Brochacho. Not morning-cold. The wrong kind of cold — like it has been touched.",
         "choices": [
-          { "text": "...Chosen?",                 "next": "chosen" },
-          { "text": "I'll fix it. Just point me.", "next": "get_going" }
+          { "text": "Show me.", "next": "show" },
+          { "text": "You are imagining things.", "next": "dismiss" }
         ]
       },
-      "chosen": {
-        "speaker": "Old Rufus",
-        "text": "Only those tied to the Veil can pass through the dungeon's lower seals. Your arrival the same night as the collapse is no coincidence, lad.",
-        "next": "get_going"
-      },
-      "get_going": {
-        "speaker": "Old Rufus",
-        "text": "The Thornwood Gate is east of the village. The first chamber of the dungeon is just past it. Start there — and don't die.\n\n[i]Quest added: Descend the Thornwood Dungeon.[/i]",
+      "show": {
+        "speaker": "Jesse",
+        "text": "Put your hand on it. You will see. The Veil does not lie, even when people do.",
         "next": "end",
-        "set_flag": "met_rufus",
-        "start_quest": "ch1_dungeon_descent"
+        "set_flag": "met_jesse"
       },
-      "end": {
-        "speaker": "",
-        "text": "",
-        "next": ""
-      }
+      "dismiss": {
+        "speaker": "Jesse",
+        "text": "...Fine. Walk past it yourself. You will feel it.",
+        "next": "end",
+        "set_flag": "met_jesse"
+      },
+      "end": { "speaker": "", "text": "", "next": "" }
     }
   },
 
-  "old_rufus_repeat": {
+  "jesse_repeat": {
     "nodes": {
       "start": {
-        "speaker": "Old Rufus",
-        "text": "The gate's east of here. Keep moving — those creatures won't seal themselves in.",
+        "speaker": "Jesse",
+        "text": "The east stone. Go feel it yourself and then tell Father.",
         "next": "end"
       },
       "end": { "speaker": "", "text": "", "next": "" }
     }
   },
 
-  "mira_the_smith": {
+  "cassin_intro": {
     "nodes": {
       "start": {
-        "speaker": "Mira",
-        "text": "I'd help more if I had copper ingots. Check the dungeon chests — there's always some in the first hall.",
+        "speaker": "Elder Cassin",
+        "text": "Ah — you must be one of Jambione's boys. I can see the resemblance. He has good sons.",
         "next": "n1"
       },
       "n1": {
-        "speaker": "Mira",
-        "text": "Bring me three ingots and I'll sharpen that rusty sword of yours for free.",
-        "next": "end",
-        "start_quest": "ch1_copper_ingots"
-      },
-      "end": { "speaker": "", "text": "", "next": "" }
-    }
-  },
-
-  "mira_has_ingots": {
-    "nodes": {
-      "start": {
-        "speaker": "Mira",
-        "text": "You found them! Give me a moment...",
-        "next": "n1"
-      },
-      "n1": {
-        "speaker": "Mira",
-        "text": "There. The Short Sword is now a Long Sword. Should do you well against the golems.",
-        "next": "end",
-        "set_flag": "mira_upgraded",
-        "complete_quest": "ch1_copper_ingots",
-        "give_item": "long_sword"
-      },
-      "end": { "speaker": "", "text": "", "next": "" }
-    }
-  },
-
-  "zara_join": {
-    "nodes": {
-      "start": {
-        "speaker": "Zara",
-        "text": "Oh, another one stumbling toward the dungeon. Wonderful.",
-        "next": "n1"
-      },
-      "n1": {
-        "speaker": "Zara",
-        "text": "Before you ask — yes, I know magic. And yes, I'll come with you. The Veil's collapse disrupted my research anyway.",
+        "speaker": "Elder Cassin",
+        "text": "My name is Cassin. I represent the Settlement Council. I am here to speak with your father — nothing serious. Neighbors talking.",
         "choices": [
-          { "text": "Glad to have you.",   "next": "accept" },
-          { "text": "I work alone.",        "next": "decline" }
+          { "text": "I will get him.", "next": "fetch" },
+          { "text": "What do you want with him?", "next": "question" }
         ]
       },
-      "accept": {
-        "speaker": "Zara",
-        "text": "Don't make me regret it.\n\n[i]Zara joined the party![/i]",
-        "next": "end",
-        "set_flag": "zara_joined",
-        "add_member": "mage"
+      "question": {
+        "speaker": "Elder Cassin",
+        "text": "Ha — suspicious. Just like Jambione. That is not a bad thing, boy. The world rewards the careful.",
+        "next": "fetch"
       },
-      "decline": {
-        "speaker": "Zara",
-        "text": "...Suit yourself. I'll be here when you change your mind.",
+      "fetch": {
+        "speaker": "Elder Cassin",
+        "text": "Tell him Elder Cassin sends his warmest regards. And that the offer still stands.\n\n[i]It always will.[/i]",
+        "next": "end",
+        "set_flag": "met_cassin"
+      },
+      "end": { "speaker": "", "text": "", "next": "" }
+    }
+  },
+
+  "cassin_repeat": {
+    "nodes": {
+      "start": {
+        "speaker": "Elder Cassin",
+        "text": "Is your father nearby? I would appreciate a word with him when he has a moment.",
         "next": "end"
       },
       "end": { "speaker": "", "text": "", "next": "" }
     }
   },
 
-  "slink_join": {
+  "act1_complete": {
     "nodes": {
       "start": {
-        "speaker": "Slink",
-        "text": "Psst. Yeah, you. Word spreads fast in a small village.",
+        "speaker": "Jambione",
+        "text": "You have done well today. The Hold knows you walked it.",
         "next": "n1"
       },
       "n1": {
-        "speaker": "Slink",
-        "text": "You're heading into the dungeon, right? I know every shortcut in the first three floors. Could be useful.",
-        "choices": [
-          { "text": "You're in.",                  "next": "accept" },
-          { "text": "What's in it for you?",       "next": "deal" }
-        ]
-      },
-      "deal": {
-        "speaker": "Slink",
-        "text": "Even split on the gold. And I keep whatever I can pocket from the enemies. Deal?",
-        "choices": [
-          { "text": "Deal.",    "next": "accept" },
-          { "text": "No deal.", "next": "decline" }
-        ]
-      },
-      "accept": {
-        "speaker": "Slink",
-        "text": "Ha! Good. I like you already.\n\n[i]Slink joined the party![/i]",
-        "next": "end",
-        "set_flag": "slink_joined",
-        "add_member": "rogue"
-      },
-      "decline": {
-        "speaker": "Slink",
-        "text": "Your loss. I'll find someone else.",
-        "next": "end"
-      },
-      "end": { "speaker": "", "text": "", "next": "" }
-    }
-  },
-
-  "dungeon_chest_lore": {
-    "nodes": {
-      "start": {
-        "speaker": "???",
-        "text": "[Faded journal entry]\n\n'The Golem Warden was placed here to prevent mortals from reaching the lower seals. It must not be destroyed — only pacified with the Resonance Stone.'",
-        "next": "end"
-      },
-      "end": { "speaker": "", "text": "", "next": "" }
-    }
-  },
-
-  "boss_golem_taunt": {
-    "nodes": {
-      "start": {
-        "speaker": "Mud Golem",
-        "text": "[The golem lets out a grinding roar. Dust shakes from the ceiling.]",
-        "next": "end"
-      },
-      "end": { "speaker": "", "text": "", "next": "" }
-    }
-  },
-
-  "ch1_complete": {
-    "nodes": {
-      "start": {
-        "speaker": "Old Rufus",
-        "text": "You made it back. And the seal... I can feel it. The first one is restored.",
-        "next": "n1"
-      },
-      "n1": {
-        "speaker": "Old Rufus",
-        "text": "There are four seals in total. The Veil won't hold on just one.",
+        "speaker": "Jambione",
+        "text": "Cassin will come back. Men like him always do. When he does — remember what the east stone felt like. Hold that feeling.",
         "next": "n2"
       },
       "n2": {
-        "speaker": "Old Rufus",
-        "text": "Rest. The second dungeon lies beyond the Ashfen Marsh. You'll need supplies.",
+        "speaker": "Jambione",
+        "text": "Now come inside. Your mother has supper waiting.",
         "next": "end",
-        "set_flag": "ch1_complete",
-        "complete_quest": "ch1_dungeon_descent"
+        "set_flag": "act1_complete",
+        "complete_quest": "act1_boundary_walk"
       },
       "end": { "speaker": "", "text": "", "next": "" }
     }
