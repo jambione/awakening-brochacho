@@ -1,0 +1,14 @@
+# Godot build artifacts
+.godot/
+*.translation
+export_presets.cfg
+
+# Import cache (regenerated)
+.import/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+*.swp

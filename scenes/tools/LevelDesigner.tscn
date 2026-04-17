@@ -1,0 +1,60 @@
+[gd_scene load_steps=2 format=3 uid="uid://leveldesigner"]
+
+[ext_resource type="Script" path="res://scripts/tools/LevelDesigner.gd" id="1"]
+
+[node name="LevelDesigner" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1")
+
+[node name="UI" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Left" type="VBoxContainer" parent="UI"]
+custom_minimum_size = Vector2(80, 0)
+
+[node name="Palette" type="GridContainer" parent="UI/Left"]
+columns = 2
+
+[node name="ObjectPalette" type="ItemList" parent="UI/Left"]
+custom_minimum_size = Vector2(80, 80)
+
+[node name="Center" type="VBoxContainer" parent="UI"]
+size_flags_horizontal = 3
+
+[node name="Top" type="HBoxContainer" parent="UI/Center"]
+
+[node name="Toolbar" type="HBoxContainer" parent="UI/Center/Top"]
+size_flags_horizontal = 3
+
+[node name="MapNameInput" type="LineEdit" parent="UI/Center/Top"]
+placeholder_text = "map_name"
+custom_minimum_size = Vector2(100, 0)
+
+[node name="Viewport" type="SubViewportContainer" parent="UI/Center"]
+size_flags_vertical = 3
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="UI/Center/Viewport"]
+size = Vector2i(320, 240)
+
+[node name="TileMap" type="TileMapLayer" parent="UI/Center/Viewport/SubViewport"]
+
+[node name="Bottom" type="HBoxContainer" parent="UI/Center"]
+
+[node name="StatusBar" type="Label" parent="UI/Center/Bottom"]
+size_flags_horizontal = 3
+text = "Ready"
+
+[node name="Right" type="VBoxContainer" parent="UI"]
+custom_minimum_size = Vector2(100, 0)
+
+[node name="Properties" type="VBoxContainer" parent="UI/Right"]
+
+[node name="PropsLabel" type="Label" parent="UI/Right/Properties"]
+text = "Properties"

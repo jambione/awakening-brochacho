@@ -1,0 +1,8 @@
+[
+  { "id": "potion",      "name": "Potion",       "type": "consumable", "effect": "heal_hp",   "value": 20, "price": 30 },
+  { "id": "hi_potion",   "name": "Hi-Potion",    "type": "consumable", "effect": "heal_hp",   "value": 80, "price": 120 },
+  { "id": "ether",       "name": "Ether",        "type": "consumable", "effect": "heal_mp",   "value": 20, "price": 50 },
+  { "id": "antidote",    "name": "Antidote",     "type": "consumable", "effect": "cure_poison","value": 1,  "price": 25 },
+  { "id": "short_sword", "name": "Short Sword",  "type": "weapon",     "stats": {"str": 3},   "price": 80 },
+  { "id": "leather_armor","name":"Leather Armor","type": "armor",      "stats": {"def": 3},   "price": 60 }
+]

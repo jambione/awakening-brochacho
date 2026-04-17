@@ -1,0 +1,63 @@
+[gd_scene load_steps=2 format=3 uid="uid://assetpainter"]
+
+[ext_resource type="Script" path="res://scripts/tools/AssetPainter.gd" id="1"]
+
+[node name="AssetPainter" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1")
+
+[node name="UI" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Left" type="VBoxContainer" parent="UI"]
+custom_minimum_size = Vector2(60, 0)
+
+[node name="ColorPalette" type="GridContainer" parent="UI/Left"]
+columns = 4
+
+[node name="Main" type="VBoxContainer" parent="UI"]
+size_flags_horizontal = 3
+
+[node name="Top" type="HBoxContainer" parent="UI/Main"]
+
+[node name="ToolBar" type="HBoxContainer" parent="UI/Main/Top"]
+size_flags_horizontal = 3
+
+[node name="FileNameInput" type="LineEdit" parent="UI/Main/Top"]
+placeholder_text = "sprite_name"
+custom_minimum_size = Vector2(80, 0)
+
+[node name="CanvasSizeX" type="SpinBox" parent="UI/Main/Top"]
+min_value = 8.0
+max_value = 64.0
+step = 8.0
+value = 16.0
+
+[node name="CanvasSizeY" type="SpinBox" parent="UI/Main/Top"]
+min_value = 8.0
+max_value = 64.0
+step = 8.0
+value = 16.0
+
+[node name="NewBtn" type="Button" parent="UI/Main/Top"]
+text = "New(Ctrl+N)"
+
+[node name="CanvasContainer" type="CenterContainer" parent="UI/Main"]
+size_flags_vertical = 3
+
+[node name="Canvas" type="TextureRect" parent="UI/Main/CanvasContainer"]
+custom_minimum_size = Vector2(256, 256)
+expand_mode = 0
+stretch_mode = 5
+
+[node name="Bottom" type="HBoxContainer" parent="UI/Main"]
+
+[node name="Status" type="Label" parent="UI/Main/Bottom"]
+size_flags_horizontal = 3
+text = "Asset Painter"

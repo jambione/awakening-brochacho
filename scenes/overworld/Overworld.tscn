@@ -1,0 +1,57 @@
+[gd_scene load_steps=2 format=3 uid="uid://overworld"]
+
+[ext_resource type="Script" path="res://scripts/overworld/Overworld.gd" id="1"]
+
+[node name="Overworld" type="Node2D"]
+script = ExtResource("1")
+
+[node name="TileMapLayer" type="TileMapLayer" parent="."]
+
+[node name="NPCs" type="Node2D" parent="."]
+
+[node name="Triggers" type="Node2D" parent="."]
+
+[node name="Player" type="CharacterBody2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player"]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Player"]
+
+[node name="InteractRay" type="RayCast2D" parent="Player"]
+target_position = Vector2(0, 16)
+enabled = true
+
+[node name="StepTimer" type="Timer" parent="Player"]
+wait_time = 0.4
+
+[node name="Camera2D" type="Camera2D" parent="Player"]
+zoom = Vector2(2, 2)
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="DialogueBox" type="Control" parent="HUD"]
+visible = false
+layout_mode = 1
+anchors_preset = 12
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -48.0
+
+[node name="Panel" type="Panel" parent="HUD/DialogueBox"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Text" type="Label" parent="HUD/DialogueBox/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 4.0
+offset_right = -8.0
+offset_bottom = -4.0
+autowrap_mode = 3
