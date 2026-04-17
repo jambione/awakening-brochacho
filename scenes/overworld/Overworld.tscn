@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://overworld"]
+[gd_scene load_steps=14 format=3 uid="uid://overworld"]
 
 [ext_resource type="Script" path="res://scripts/overworld/Overworld.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/player/Player.tscn" id="2"]
@@ -7,6 +7,15 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/characters/jambione.png" id="5"]
 [ext_resource type="Texture2D" path="res://assets/sprites/characters/jesse.png" id="6"]
 [ext_resource type="Texture2D" path="res://assets/sprites/characters/cassin.png" id="7"]
+[ext_resource type="Texture2D" path="res://assets/sprites/tilesets/urban_packed.png" id="8"]
+
+[sub_resource type="TileSetAtlasSource" id="AtlasSource_1"]
+texture = ExtResource("8")
+texture_region_size = Vector2i(16, 16)
+
+[sub_resource type="TileSet" id="TileSet_1"]
+tile_size = Vector2i(16, 16)
+sources/0 = SubResource("AtlasSource_1")
 
 [sub_resource type="RectangleShape2D" id="NpcShape_1"]
 size = Vector2(12, 14)
@@ -28,6 +37,8 @@ offset_right = 2000.0
 offset_bottom = 2000.0
 
 [node name="TileMapLayer" type="TileMapLayer" parent="."]
+tile_set = SubResource("TileSet_1")
+texture_filter = 1
 
 [node name="NPCs" type="Node2D" parent="."]
 
