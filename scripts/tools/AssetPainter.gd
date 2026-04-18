@@ -1,14 +1,17 @@
 ## AssetPainter — in-game pixel sprite editor.
 ##
-## Tools:  1 Pencil   2 Eraser   3 Fill   4 Eyedrop   5 Line   6 Rect
+## Tools:
+##   1 Pencil   2 Eraser   3 Fill   4 Eyedrop   5 Line   6 Rect   7 RectFill
 ##
 ## Keyboard:
 ##   Ctrl+S  Save PNG        Ctrl+L  Load latest PNG
 ##   Ctrl+N  New canvas      Ctrl+Z  Undo    Ctrl+Shift+Z  Redo
-##   G       Toggle grid     +/-     Zoom canvas in/out
+##   G       Toggle grid     +/-     Zoom in/out
 ##   [/]     Cycle palette   Tab     Swap primary/secondary
+##   H       Flip horizontal mirror  V  Flip vertical mirror
 ##
 ## Left-click = primary colour.   Right-click = secondary colour.
+## Line/Rect/RectFill show a live preview while dragging; commit on release.
 extends Control
 
 # ---------------------------------------------------------------------------
@@ -36,7 +39,7 @@ extends Control
 # ---------------------------------------------------------------------------
 # Tool enum
 # ---------------------------------------------------------------------------
-enum Tool { PENCIL, ERASER, FILL, EYEDROP, LINE, RECT }
+enum Tool { PENCIL, ERASER, FILL, EYEDROP, LINE, RECT, RECT_FILL }
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -63,7 +66,7 @@ const PALETTE : Array[Color] = [
 var current_tool    : Tool           = Tool.PENCIL
 var primary_color   : Color          = Color.WHITE
 var secondary_color : Color          = Color.BLACK
-var palette_idx     : int            = 1   ## Index of current primary in PALETTE.
+var palette_idx     : int            = 1
 var pixel_data      : PackedColorArray
 var canvas_image    : Image
 var canvas_texture  : ImageTexture
@@ -72,6 +75,16 @@ var redo_stack      : Array[PackedColorArray] = []
 var tool_start      : Vector2i       = INVALID_PX
 var is_drawing      : bool           = false
 var show_grid       : bool           = true
+
+## Captured at the start of LINE / RECT / RECT_FILL so preview can be redrawn
+## each motion event without permanently dirtying pixel_data until release.
+var stroke_snapshot : PackedColorArray
+## Colour committed at mouse-press so right-click release uses the same colour.
+var drawing_color   : Color          = Color.WHITE
+
+## Mirror drawing axes — toggled with H / V keys.
+var mirror_h        : bool           = false
+var mirror_v        : bool           = false
 
 # ---------------------------------------------------------------------------
 # Lifecycle
@@ -83,7 +96,7 @@ func _ready() -> void:
 	_build_palette()
 	_build_toolbar()
 	_update_swatches()
-	_set_status("Asset Painter  |  1-6 Tools  G Grid  +/- Zoom  Tab Swap  Ctrl+S Save")
+	_set_status("Asset Painter  |  1-7 Tools  G Grid  +/- Zoom  Tab Swap  H/V Mirror  Ctrl+S Save")
 
 # ---------------------------------------------------------------------------
 # Canvas initialisation
@@ -94,7 +107,7 @@ func _init_canvas(w: int, h: int) -> void:
 	canvas_height = h
 	pixel_data    = PackedColorArray()
 	pixel_data.resize(w * h)
-	pixel_data.fill(Color(0.0, 0.0, 0.0, 0.0))   ## Fully transparent.
+	pixel_data.fill(Color(0.0, 0.0, 0.0, 0.0))
 
 	canvas_image   = Image.create(w, h, false, Image.FORMAT_RGBA8)
 	canvas_texture = ImageTexture.create_from_image(canvas_image)
@@ -121,15 +134,23 @@ func _input(event: InputEvent) -> void:
 			KEY_4: _set_tool(Tool.EYEDROP)
 			KEY_5: _set_tool(Tool.LINE)
 			KEY_6: _set_tool(Tool.RECT)
+			KEY_7: _set_tool(Tool.RECT_FILL)
 			KEY_G:
 				show_grid = not show_grid
 				_queue_redraw_grid()
 				_set_status("Grid %s" % ("on" if show_grid else "off"))
+			KEY_H:
+				mirror_h = not mirror_h
+				_set_status("Mirror H %s" % ("on" if mirror_h else "off"))
+			KEY_V:
+				mirror_v = not mirror_v
+				_set_status("Mirror V %s" % ("on" if mirror_v else "off"))
 			KEY_TAB:
 				var tmp : Color = primary_color
 				primary_color   = secondary_color
 				secondary_color = tmp
 				_update_swatches()
+				_set_status("Colors swapped")
 			KEY_EQUAL:   # + zoom in
 				pixel_size = min(pixel_size + 2, 32)
 				_resize_canvas_display()
@@ -140,10 +161,12 @@ func _input(event: InputEvent) -> void:
 				palette_idx   = (palette_idx + 1) % PALETTE.size()
 				primary_color = PALETTE[palette_idx]
 				_update_swatches()
+				_set_status("Palette → #%s" % primary_color.to_html(false))
 			KEY_BRACKETLEFT:
 				palette_idx   = (palette_idx - 1 + PALETTE.size()) % PALETTE.size()
 				primary_color = PALETTE[palette_idx]
 				_update_swatches()
+				_set_status("Palette → #%s" % primary_color.to_html(false))
 			KEY_S:
 				if event.ctrl_pressed: _save_sprite()
 			KEY_L:
@@ -157,26 +180,69 @@ func _input(event: InputEvent) -> void:
 	# ── Mouse buttons ────────────────────────────────────────────────────────
 	if event is InputEventMouseButton:
 		var px : Vector2i = _screen_to_pixel(event.position)
-		if px == INVALID_PX:
-			return
+
 		if event.pressed:
-			_push_undo()
-			is_drawing = true
-			tool_start = px
-			var col : Color = primary_color if event.button_index == MOUSE_BUTTON_LEFT else secondary_color
-			_apply_tool(px, col)
+			if px == INVALID_PX:
+				return
+			is_drawing    = true
+			tool_start    = px
+			drawing_color = primary_color if event.button_index == MOUSE_BUTTON_LEFT else secondary_color
+
+			match current_tool:
+				Tool.EYEDROP:
+					# Eyedrop never modifies pixels — no undo needed.
+					_apply_tool(px, drawing_color)
+				Tool.LINE, Tool.RECT, Tool.RECT_FILL:
+					# Capture clean state before the stroke; apply on release.
+					_push_undo()
+					stroke_snapshot = pixel_data.duplicate()
+				_:
+					_push_undo()
+					_apply_tool(px, drawing_color)
+
 		else:
+			# Mouse release — commit LINE / RECT / RECT_FILL.
+			if current_tool in [Tool.LINE, Tool.RECT, Tool.RECT_FILL] and is_drawing and tool_start != INVALID_PX:
+				var release_px : Vector2i = px if px != INVALID_PX else tool_start
+				pixel_data = stroke_snapshot.duplicate()
+				_commit_shape(tool_start, release_px, drawing_color)
+				_refresh_texture()
+
 			is_drawing = false
 			tool_start = INVALID_PX
 
 	# ── Mouse motion ─────────────────────────────────────────────────────────
-	if event is InputEventMouseMotion and is_drawing:
-		var px  : Vector2i = _screen_to_pixel(event.position)
+	if event is InputEventMouseMotion:
+		var px : Vector2i = _screen_to_pixel(event.position)
+
+		# Always show coordinates while hovering.
+		if px != INVALID_PX:
+			var hover_col : Color = _get_pixel(px.x, px.y)
+			_set_status("[%d, %d]  #%s  | Tool: %s%s%s" % [
+				px.x, px.y, hover_col.to_html(false),
+				Tool.keys()[current_tool],
+				"  H" if mirror_h else "",
+				"  V" if mirror_v else "",
+			])
+
+		if not is_drawing:
+			return
 		if px == INVALID_PX:
 			return
+
 		var col : Color = primary_color if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) else secondary_color
-		if current_tool in [Tool.PENCIL, Tool.ERASER]:
-			_apply_tool(px, col)
+
+		match current_tool:
+			Tool.PENCIL, Tool.ERASER:
+				_apply_tool(px, col)
+			Tool.EYEDROP:
+				_apply_tool(px, col)
+			Tool.LINE, Tool.RECT, Tool.RECT_FILL:
+				# Live preview: restore baseline and redraw candidate shape.
+				if tool_start != INVALID_PX:
+					pixel_data = stroke_snapshot.duplicate()
+					_commit_shape(tool_start, px, drawing_color)
+					_refresh_texture()
 
 # ---------------------------------------------------------------------------
 # Tool dispatch
@@ -184,17 +250,25 @@ func _input(event: InputEvent) -> void:
 
 func _apply_tool(px: Vector2i, col: Color) -> void:
 	match current_tool:
-		Tool.PENCIL:  _set_pixel(px.x, px.y, col)
-		Tool.ERASER:  _set_pixel(px.x, px.y, Color(0.0, 0.0, 0.0, 0.0))
-		Tool.FILL:    _flood_fill(px, col)
-		Tool.EYEDROP: _eyedrop(px)
-		Tool.LINE:
-			if tool_start != INVALID_PX:
-				_draw_line_bresenham(tool_start, px, col)
-		Tool.RECT:
-			if tool_start != INVALID_PX:
-				_draw_rect_outline(tool_start, px, col)
+		Tool.PENCIL:
+			_paint_with_mirror(px, col)
+		Tool.ERASER:
+			_paint_with_mirror(px, Color(0.0, 0.0, 0.0, 0.0))
+		Tool.FILL:
+			_flood_fill(px, col)
+		Tool.EYEDROP:
+			_eyedrop(px)
+			return   # Eyedrop does not write pixels; skip refresh.
+		Tool.LINE, Tool.RECT, Tool.RECT_FILL:
+			pass   # Handled at mouse-button level.
 	_refresh_texture()
+
+## Commit the final shape for LINE / RECT / RECT_FILL.
+func _commit_shape(a: Vector2i, b: Vector2i, col: Color) -> void:
+	match current_tool:
+		Tool.LINE:      _draw_line_bresenham(a, b, col)
+		Tool.RECT:      _draw_rect_outline(a, b, col)
+		Tool.RECT_FILL: _draw_rect_filled(a, b, col)
 
 # ---------------------------------------------------------------------------
 # Pixel operations
@@ -210,10 +284,32 @@ func _get_pixel(x: int, y: int) -> Color:
 		return Color(0.0, 0.0, 0.0, 0.0)
 	return pixel_data[y * canvas_width + x]
 
+## Write a pixel and apply mirror axes if enabled.
+func _paint_with_mirror(px: Vector2i, col: Color) -> void:
+	_set_pixel(px.x, px.y, col)
+	if mirror_h:
+		_set_pixel(canvas_width - 1 - px.x, px.y, col)
+	if mirror_v:
+		_set_pixel(px.x, canvas_height - 1 - px.y, col)
+	if mirror_h and mirror_v:
+		_set_pixel(canvas_width - 1 - px.x, canvas_height - 1 - px.y, col)
+
 func _eyedrop(px: Vector2i) -> void:
-	primary_color = _get_pixel(px.x, px.y)
+	var picked : Color = _get_pixel(px.x, px.y)
+	primary_color = picked
+	# Sync palette index to the closest palette entry.
+	var best_dist : float = INF
+	var best_idx  : int   = palette_idx
+	for i : int in PALETTE.size():
+		var d : float = (abs(picked.r - PALETTE[i].r)
+			+ abs(picked.g - PALETTE[i].g)
+			+ abs(picked.b - PALETTE[i].b))
+		if d < best_dist:
+			best_dist = d
+			best_idx  = i
+	palette_idx = best_idx
 	_update_swatches()
-	_set_status("Picked: #%s" % primary_color.to_html(false))
+	_set_status("Picked: #%s" % picked.to_html(false))
 
 # ---------------------------------------------------------------------------
 # Drawing primitives
@@ -232,20 +328,29 @@ func _draw_line_bresenham(a: Vector2i, b: Vector2i, col: Color) -> void:
 		if cx == b.x and cy == b.y:
 			break
 		var e2 : int = 2 * err
-		if e2 > -dy: err -= dy ; cx += sx
-		if e2 <  dx: err += dx ; cy += sy
+		if e2 > -dy: err -= dy; cx += sx
+		if e2 <  dx: err += dx; cy += sy
 
 func _draw_rect_outline(a: Vector2i, b: Vector2i, col: Color) -> void:
 	var x0 : int = min(a.x, b.x)
 	var y0 : int = min(a.y, b.y)
 	var x1 : int = max(a.x, b.x)
 	var y1 : int = max(a.y, b.y)
-	for x in range(x0, x1 + 1):
+	for x : int in range(x0, x1 + 1):
 		_set_pixel(x, y0, col)
 		_set_pixel(x, y1, col)
-	for y in range(y0, y1 + 1):
+	for y : int in range(y0, y1 + 1):
 		_set_pixel(x0, y, col)
 		_set_pixel(x1, y, col)
+
+func _draw_rect_filled(a: Vector2i, b: Vector2i, col: Color) -> void:
+	var x0 : int = min(a.x, b.x)
+	var y0 : int = min(a.y, b.y)
+	var x1 : int = max(a.x, b.x)
+	var y1 : int = max(a.y, b.y)
+	for y : int in range(y0, y1 + 1):
+		for x : int in range(x0, x1 + 1):
+			_set_pixel(x, y, col)
 
 func _flood_fill(start: Vector2i, new_col: Color) -> void:
 	var target : Color         = _get_pixel(start.x, start.y)
@@ -271,23 +376,21 @@ func _flood_fill(start: Vector2i, new_col: Color) -> void:
 # ---------------------------------------------------------------------------
 
 func _refresh_texture() -> void:
-	for y in canvas_height:
-		for x in canvas_width:
+	for y : int in canvas_height:
+		for x : int in canvas_width:
 			canvas_image.set_pixel(x, y, pixel_data[y * canvas_width + x])
 	canvas_texture.update(canvas_image)
 	if preview_rect:
 		preview_rect.texture = canvas_texture
 
 # ---------------------------------------------------------------------------
-# Grid overlay (drawn by a child Control's _draw callback)
+# Grid overlay
 # ---------------------------------------------------------------------------
 
 func _queue_redraw_grid() -> void:
 	if grid_overlay:
 		grid_overlay.queue_redraw()
 
-## Call this from GridOverlay's _draw() via a callable set in _ready().
-## (In the .tscn, GridOverlay should have a script with _draw using this.)
 func draw_grid(ci: CanvasItem) -> void:
 	if not show_grid:
 		return
@@ -295,9 +398,9 @@ func draw_grid(ci: CanvasItem) -> void:
 	var w   : float = float(canvas_width  * pixel_size)
 	var h   : float = float(canvas_height * pixel_size)
 	var ps  : float = float(pixel_size)
-	for x in canvas_width + 1:
+	for x : int in canvas_width + 1:
 		ci.draw_line(Vector2(x * ps, 0.0), Vector2(x * ps, h), col)
-	for y in canvas_height + 1:
+	for y : int in canvas_height + 1:
 		ci.draw_line(Vector2(0.0, y * ps), Vector2(w, y * ps), col)
 
 # ---------------------------------------------------------------------------
@@ -315,14 +418,14 @@ func _undo() -> void:
 	redo_stack.append(pixel_data.duplicate())
 	pixel_data = undo_stack.pop_back()
 	_refresh_texture()
-	_set_status("Undo")
+	_set_status("Undo  (%d left)" % undo_stack.size())
 
 func _redo() -> void:
 	if redo_stack.is_empty(): return
 	undo_stack.append(pixel_data.duplicate())
 	pixel_data = redo_stack.pop_back()
 	_refresh_texture()
-	_set_status("Redo")
+	_set_status("Redo  (%d left)" % redo_stack.size())
 
 # ---------------------------------------------------------------------------
 # Save / Load
@@ -346,8 +449,8 @@ func _load_sprite(path: String) -> void:
 		return
 	_push_undo()
 	_init_canvas(img.get_width(), img.get_height())
-	for y in canvas_height:
-		for x in canvas_width:
+	for y : int in canvas_height:
+		for x : int in canvas_width:
 			_set_pixel(x, y, img.get_pixel(x, y))
 	_refresh_texture()
 	_set_status("Loaded: " + path)
@@ -369,6 +472,8 @@ func _load_latest_sprite() -> void:
 func _new_canvas() -> void:
 	var w : int = int(canvas_size_x.value) if canvas_size_x else 16
 	var h : int = int(canvas_size_y.value) if canvas_size_y else 16
+	w = clamp(w, 1, 128)
+	h = clamp(h, 1, 128)
 	_push_undo()
 	_init_canvas(w, h)
 	_set_status("New %d×%d canvas" % [w, h])
@@ -378,7 +483,7 @@ func _new_canvas() -> void:
 # ---------------------------------------------------------------------------
 
 func _build_palette() -> void:
-	for c in PALETTE:
+	for c : Color in PALETTE:
 		var swatch : ColorRect = ColorRect.new()
 		swatch.color               = c
 		swatch.custom_minimum_size = Vector2(18.0, 18.0)
@@ -391,6 +496,10 @@ func _on_palette_input(event: InputEvent, col: Color) -> void:
 	var mbe : InputEventMouseButton = event
 	if mbe.button_index == MOUSE_BUTTON_LEFT:
 		primary_color = col
+		# Sync palette index.
+		palette_idx = PALETTE.find(col)
+		if palette_idx == -1:
+			palette_idx = 0
 	elif mbe.button_index == MOUSE_BUTTON_RIGHT:
 		secondary_color = col
 	_update_swatches()
@@ -406,24 +515,43 @@ func _update_swatches() -> void:
 # ---------------------------------------------------------------------------
 
 func _build_toolbar() -> void:
+	var tool_group : ButtonGroup = ButtonGroup.new()
 	var entries : Array = [
-		["Pencil(1)", Tool.PENCIL], ["Eraser(2)", Tool.ERASER],
-		["Fill(3)",   Tool.FILL],   ["Pick(4)",   Tool.EYEDROP],
-		["Line(5)",   Tool.LINE],   ["Rect(6)",   Tool.RECT],
+		["Pencil(1)",   Tool.PENCIL],   ["Eraser(2)",   Tool.ERASER],
+		["Fill(3)",     Tool.FILL],     ["Pick(4)",     Tool.EYEDROP],
+		["Line(5)",     Tool.LINE],     ["Rect(6)",     Tool.RECT],
+		["RectFill(7)", Tool.RECT_FILL],
 	]
-	for entry in entries:
+	for entry : Array in entries:
 		var btn : Button = Button.new()
-		btn.text = str(entry[0])
+		btn.text         = str(entry[0])
+		btn.toggle_mode  = true
+		btn.button_group = tool_group
 		var t : Tool = entry[1] as Tool
 		btn.pressed.connect(_set_tool.bind(t))
 		tool_bar.add_child(btn)
 
+	# Mirror toggles
+	for data : Array in [["H-Mirror", func() -> void: mirror_h = not mirror_h; _set_status("Mirror H %s" % ("on" if mirror_h else "off"))],
+						  ["V-Mirror", func() -> void: mirror_v = not mirror_v; _set_status("Mirror V %s" % ("on" if mirror_v else "off"))]]:
+		var btn : Button = Button.new()
+		btn.text        = str(data[0])
+		btn.toggle_mode = true
+		btn.pressed.connect(data[1] as Callable)
+		tool_bar.add_child(btn)
+
+	for data : Array in [["Save(Ctrl+S)", _save_sprite], ["Load(Ctrl+L)", _load_latest_sprite], ["New(Ctrl+N)", _new_canvas]]:
+		var btn : Button = Button.new()
+		btn.text = str(data[0])
+		btn.pressed.connect(data[1] as Callable)
+		tool_bar.add_child(btn)
+
 func _set_tool(t: Tool) -> void:
 	current_tool = t
-	_set_status("Tool: " + Tool.keys()[t])
+	_set_status("Tool: %s" % Tool.keys()[t])
 
 # ---------------------------------------------------------------------------
-# Zoom helper
+# Zoom / resize
 # ---------------------------------------------------------------------------
 
 func _resize_canvas_display() -> void:
