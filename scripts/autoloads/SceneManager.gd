@@ -14,12 +14,19 @@ signal transition_finished(to_scene: String)
 # Scene registry  —  add new scenes here; use the key as the argument to go_to.
 # ---------------------------------------------------------------------------
 const SCENES : Dictionary = {
-	"main"           : "res://scenes/main/Main.tscn",
-	"overworld"      : "res://scenes/overworld/Overworld.tscn",
-	"dungeon"        : "res://scenes/dungeon/Dungeon.tscn",
-	"combat"         : "res://scenes/combat/Combat.tscn",
-	"level_designer" : "res://scenes/tools/LevelDesigner.tscn",
-	"asset_painter"  : "res://scenes/tools/AssetPainter.tscn",
+	"main"               : "res://scenes/main/Main.tscn",
+	"overworld"          : "res://scenes/overworld/Overworld.tscn",
+	"dungeon"            : "res://scenes/dungeon/Dungeon.tscn",
+	"combat"             : "res://scenes/combat/Combat.tscn",
+	"level_designer"     : "res://scenes/tools/LevelDesigner.tscn",
+	"asset_painter"      : "res://scenes/tools/AssetPainter.tscn",
+	"dialogue_designer"  : "res://scenes/tools/DialogueDesigner.tscn",
+	"enemy_designer"     : "res://scenes/tools/EnemyDesigner.tscn",
+	"item_designer"      : "res://scenes/tools/ItemDesigner.tscn",
+	"skill_designer"     : "res://scenes/tools/SkillDesigner.tscn",
+	"quest_designer"     : "res://scenes/tools/QuestDesigner.tscn",
+	"room_designer"      : "res://scenes/tools/DungeonRoomDesigner.tscn",
+	"anim_designer"      : "res://scenes/tools/AnimationDesigner.tscn",
 }
 
 # ---------------------------------------------------------------------------
