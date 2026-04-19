@@ -15,6 +15,24 @@ func _ready() -> void:
 	asset_painter_btn.pressed.connect(func(): SceneManager.go_to("asset_painter"))
 	quit_btn.pressed.connect(func(): get_tree().quit())
 
+	# Inject designer tool buttons before Quit.
+	var vbox : VBoxContainer = $UI/MainMenu/VBox
+	for entry : Array in [
+		["Dialogue Designer",     "dialogue_designer"],
+		["Enemy Designer",        "enemy_designer"],
+		["Item Designer",         "item_designer"],
+		["Skill Designer",        "skill_designer"],
+		["Quest Designer",        "quest_designer"],
+		["Dungeon Room Designer", "room_designer"],
+		["Animation Designer",    "anim_designer"],
+	]:
+		var btn := Button.new()
+		btn.text = str(entry[0])
+		var key := str(entry[1])
+		btn.pressed.connect(func(): SceneManager.go_to(key))
+		vbox.add_child(btn)
+		vbox.move_child(btn, quit_btn.get_index())
+
 	AudioManager.play_music("res://assets/audio/music/title_theme.ogg")
 
 func _on_new_game() -> void:
